@@ -14,7 +14,7 @@ namespace http {
                 Headers(std::unordered_map<std::string, std::string> headers);
 
                 std::unordered_map<std::string, std::string> all() const { return _headers; }
-                void printAll();
+                void print_all();
 
                 static Headers from_vector(std::vector<std::string> headers_vector);
             private:

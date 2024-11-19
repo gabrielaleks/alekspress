@@ -31,7 +31,7 @@ namespace http {
             return Headers(headers_map);
         }
 
-        void Headers::printAll() {
+        void Headers::print_all() {
             for (const auto& [key, value] : _headers) {
                 std::cout << key << ": " << value << std::endl;
             }
