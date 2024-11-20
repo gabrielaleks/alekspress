@@ -1,5 +1,4 @@
-#ifndef BODY_HPP
-#define BODY_HPP
+#pragma once
 
 #include <string>
 
@@ -19,5 +18,3 @@ namespace http {
         };
     }
 }
-
-#endif

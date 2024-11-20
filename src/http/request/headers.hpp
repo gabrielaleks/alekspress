@@ -1,5 +1,4 @@
-#ifndef HEADERS_HPP
-#define HEADERS_HPP
+#pragma once
 
 #include <string>
 #include <unordered_map>
@@ -22,5 +21,3 @@ namespace http {
         };
     }
 }
-
-#endif

@@ -1,5 +1,4 @@
-#ifndef REQUEST_LINE_HPP
-#define REQUEST_LINE_HPP
+#pragma once
 
 #include <string>
 #include <string_view>
@@ -38,5 +37,3 @@ namespace http {
         };
     }  // namespace request
 }  // namespace http
-
-#endif
