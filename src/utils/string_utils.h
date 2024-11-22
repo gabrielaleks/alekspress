@@ -6,15 +6,16 @@
 namespace utils {
     class StringUtils {
         public:
-            static std::string to_lowercase(std::string& str) {
+            static std::string to_lowercase(const std::string& str) {
+                std::string result = str;
                 std::transform(
-                    str.begin(),
-                    str.end(),
-                    str.begin(),
+                    result.begin(),
+                    result.end(),
+                    result.begin(),
                     [](unsigned char c) { return std::tolower(c); }
                 );
 
-                return str;
+                return result;
             }
     };
 }

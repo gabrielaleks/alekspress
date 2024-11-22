@@ -41,9 +41,8 @@ namespace http {
                     throw std::invalid_argument("Invalid HTTP header: " + line);
                 }
 
-                std::string key =  line.substr(0, keyEnd);
-                utils::StringUtils::to_lowercase(key);
-
+                std::string key = utils::StringUtils::to_lowercase(line.substr(0, keyEnd));
+                
                 std::string value = line.substr(keyEnd + 2);
 
                 // Check for key's existence in map
@@ -66,7 +65,7 @@ namespace http {
         }
 
         std::string Headers::get_header(const std::string &header) const {
-            auto it = _headers.find(header);
+            auto it = _headers.find(utils::StringUtils::to_lowercase(header));
             return it != _headers.end() ? it->second : "";
         }
 
