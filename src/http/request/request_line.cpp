@@ -15,25 +15,38 @@ namespace http {
             std::string path,
             std::string http_version
         ) : _method(std::move(method)), _path(std::move(path)), _http_version(std::move(http_version)) {
+            validate();
         }
 
-        RequestLine RequestLine::from_string(std::string_view request_line_string) {
+        void RequestLine::validate() const {
+            if (!is_valid_method(_method)) {
+                throw std::invalid_argument("Invalid HTTP method: " + _method);
+            }
+            if (!is_valid_http_version(_http_version)) {
+                throw std::invalid_argument("Invalid HTTP version: " + _http_version);
+            }
+        }
+
+        RequestLine RequestLine::from_string(const std::string_view& request_line_string) {
+            if (request_line_string.empty()) {
+                throw std::invalid_argument("Request line cannot be empty");
+            }
+
+            size_t space_count = std::count(request_line_string.begin(), request_line_string.end(), ' ');
+            if (space_count != 2) {
+                throw std::invalid_argument("Request line must contain exactly three parts separated by spaces");
+            }
+            
             size_t start = 0, end = 0;
             RequestLine request_line;
 
             // Extract method
             end = request_line_string.find(" ", start);
-            if (end == std::string::npos) {
-                throw std::invalid_argument("Invalid HTTP request line: missing elements");
-            }
             request_line._method = request_line_string.substr(start, end - start);
             start = end + 1;
 
             // Extract path
             end = request_line_string.find(" ", start);
-            if (end == std::string::npos) {
-                throw std::invalid_argument("Invalid HTTP request line: missing elements");
-            }
             request_line._path = request_line_string.substr(start, end - start);
             start = end + 1;
 
@@ -43,15 +56,6 @@ namespace http {
             }
             request_line._http_version = request_line_string.substr(start);
 
-            // Validations
-            if (!is_valid_method(request_line._method)) {
-                throw std::invalid_argument("Invalid HTTP method: " + request_line._method);
-            }
-
-            if (!is_valid_http_version(request_line._http_version)) {
-                throw std::invalid_argument("Invalid HTTP version: " + request_line._http_version);
-            }
-
             return request_line;
         }
 
@@ -59,11 +63,11 @@ namespace http {
             return _method + " " + _path + " " + _http_version;
         }
 
-        bool RequestLine::is_valid_method(const std::string_view method) {
+        bool RequestLine::is_valid_method(const std::string_view& method) {
             return validMethods.find(std::string(method)) != validMethods.end();
         }
 
-        bool RequestLine::is_valid_http_version(const std::string_view http_version) {
+        bool RequestLine::is_valid_http_version(const std::string_view& http_version) {
             return validHttpVersions.find(std::string(http_version)) != validHttpVersions.end();
         }
     } // namespace request

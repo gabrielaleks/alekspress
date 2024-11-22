@@ -3,6 +3,7 @@
 #include <string>
 #include <string_view>
 #include <unordered_set>
+#include <algorithm>
 
 namespace http {
     namespace request {
@@ -16,7 +17,7 @@ namespace http {
                 std::string version
             );
 
-            static RequestLine from_string(std::string_view http_request_line_string);
+            static RequestLine from_string(const std::string_view& http_request_line_string);
 
             std::string_view method() const { return _method; }
             std::string_view path() const { return _path; }
@@ -32,8 +33,9 @@ namespace http {
             static const std::unordered_set<std::string> validMethods;
             static const std::unordered_set<std::string> validHttpVersions;
 
-            static bool is_valid_method(const std::string_view method);
-            static bool is_valid_http_version(const std::string_view http_version);
+            void validate() const;
+            static bool is_valid_method(const std::string_view& method);
+            static bool is_valid_http_version(const std::string_view& http_version);
         };
     }  // namespace request
 }  // namespace http
