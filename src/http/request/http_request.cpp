@@ -10,15 +10,7 @@ namespace http {
         ) : _request_line(std::move(request_line)), _headers(std::move(headers)), _body(std::move(body)) {
         }
 
-        /**
-         * To-do:
-         * - Handle partial reads (when buffer isnt sufficient to read all data at once)
-         * -- This might be something to handle not here, but when reading data and storing it in a buffer.
-         */
-        HttpRequest HttpRequest::from_char_buffer(const char* http_request_char_buffer) {
-            // Convert buffer to string
-            std::string http_request_string(http_request_char_buffer);
-            
+        HttpRequest HttpRequest::from_string(const std::string http_request_string) {
             std::vector<std::string> header_lines;
 
             // Extract body index and body content

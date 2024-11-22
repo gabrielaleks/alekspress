@@ -18,7 +18,7 @@ namespace http {
                 Body body
             );
 
-            static HttpRequest from_char_buffer(const char* http_request_char_buffer);
+            static HttpRequest from_string(const std::string http_request_char_buffer);
 
             RequestLine request_line() const { return _request_line; }
             Headers headers() const { return _headers; }
