@@ -12,7 +12,7 @@ namespace http {
 
                 std::string content() const { return _body; }
 
-                static Body from_string(std::string body_string);
+                static Body from_string(const std::string& body_string);
             private:
                 std::string _body;
         };
