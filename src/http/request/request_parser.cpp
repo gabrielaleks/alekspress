@@ -9,6 +9,7 @@ namespace http {
 
             if (_complete_request.length() > MAX_REQUEST_SIZE) {
                 throw std::length_error("Request exceeded maximum size: " + std::to_string(MAX_REQUEST_SIZE) + " bytes");
+                // Could throw specialized exception that returns a 413 content too large
             }
 
             if (!_is_headers_complete) {
@@ -24,8 +25,10 @@ namespace http {
                     if (_expected_content_length > 0) {
                         _method = parse_method(headers_lowercased);
                         if (is_method_without_body(_method)) {
-                            _is_request_complete = true;
-                            return;
+                            throw std::invalid_argument(
+                                "Body not allowed in " + utils::StringUtils::to_uppercase(_method) + " request"
+                            );
+                            // Could throw specialized exception that returns a 400 bad request
                         }
                     }
 
@@ -36,8 +39,10 @@ namespace http {
             }
 
             if (_is_headers_complete) {
-                if (_expected_content_length >= 0) {
+                if (_expected_content_length > 0) {
                     _is_request_complete = (_body_bytes_received >= _expected_content_length);
+                } else {
+                    _is_request_complete = true;
                 }
             }
         }
