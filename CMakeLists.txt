@@ -14,8 +14,11 @@ file(GLOB_RECURSE PROJECT_SOURCES
 add_executable(${PROJECT_NAME} ${PROJECT_SOURCES})
 
 # Include directories (this will recursively add all subdirectories under src)
-target_include_directories(${PROJECT_NAME} PRIVATE
-    ${CMAKE_SOURCE_DIR}/src
+target_include_directories(${PROJECT_NAME}
+    PUBLIC
+        ${CMAKE_SOURCE_DIR}/include  # Public headers
+    PRIVATE
+        ${CMAKE_SOURCE_DIR}/src      # Private headers
 )
 
 # Optional: Add compiler warnings
