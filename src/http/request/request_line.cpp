@@ -1,9 +1,16 @@
 #include "request_line.hpp"
+#include <iostream>
 
 namespace http {
     namespace request {
         const std::unordered_set<std::string> RequestLine::validMethods = {
-            "GET"
+            "GET",
+            "POST",
+            "PUT",
+            "PATCH",
+            "DELETE",
+            "OPTIONS",
+            "HEAD"
         };
 
         const std::unordered_set<std::string> RequestLine::validHttpVersions = {
@@ -20,14 +27,14 @@ namespace http {
 
         void RequestLine::validate() const {
             if (!is_valid_method(_method)) {
-                throw std::invalid_argument("Invalid HTTP method: " + _method);
+                throw std::invalid_argument("Invalid HTTP method: " + std::string(_method));
             }
             if (!is_valid_http_version(_http_version)) {
-                throw std::invalid_argument("Invalid HTTP version: " + _http_version);
+                throw std::invalid_argument("Invalid HTTP version: " + std::string(_http_version));
             }
         }
 
-        RequestLine RequestLine::from_string(const std::string_view& request_line_string) {
+        RequestLine RequestLine::from_string(const std::string& request_line_string) {
             if (request_line_string.empty()) {
                 throw std::invalid_argument("Request line cannot be empty");
             }
@@ -38,29 +45,32 @@ namespace http {
             }
             
             size_t start = 0, end = 0;
-            RequestLine request_line;
 
             // Extract method
             end = request_line_string.find(" ", start);
-            request_line._method = request_line_string.substr(start, end - start);
+            std::string method = request_line_string.substr(start, end - start);
             start = end + 1;
 
             // Extract path
             end = request_line_string.find(" ", start);
-            request_line._path = request_line_string.substr(start, end - start);
+            std::string path = request_line_string.substr(start, end - start);
             start = end + 1;
 
             // Extract HTTP version
             if (start >= request_line_string.size()) {
                 throw std::invalid_argument("Invalid HTTP request line: missing elements");
             }
-            request_line._http_version = request_line_string.substr(start);
+            std::string http_version = request_line_string.substr(start);
 
-            return request_line;
+            return RequestLine(
+                method,
+                path,
+                http_version
+            );
         }
 
         std::string RequestLine::to_string() const {
-            return _method + " " + _path + " " + _http_version;
+            return std::string(_method) + " " + std::string(_path) + " " + std::string(_http_version);
         }
 
         bool RequestLine::is_valid_method(const std::string_view& method) {
