@@ -17,11 +17,11 @@ namespace http {
                 std::string version
             );
 
-            static RequestLine from_string(const std::string_view& http_request_line_string);
+            static RequestLine from_string(const std::string& http_request_line_string);
 
-            std::string_view method() const { return _method; }
-            std::string_view path() const { return _path; }
-            std::string_view http_version() const { return _http_version; }
+            std::string method() const { return _method; }
+            std::string path() const { return _path; }
+            std::string http_version() const { return _http_version; }
 
             std::string to_string() const;
 
