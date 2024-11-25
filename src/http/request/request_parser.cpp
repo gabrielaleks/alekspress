@@ -2,7 +2,7 @@
 #include <iostream>
 #include "utils/string_utils.h"
 
-namespace http {
+namespace internal {
     namespace request {
         void RequestParser::append_to_request(const char* buffer, ssize_t bytes_read) {
             _complete_request.append(buffer, bytes_read);

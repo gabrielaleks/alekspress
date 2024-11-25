@@ -2,7 +2,7 @@
 
 #include <string>
 
-namespace http {
+namespace internal {
     namespace request {
         class Body {
             public:
@@ -10,7 +10,7 @@ namespace http {
 
                 Body(std::string body);
 
-                std::string content() const { return _body; }
+                std::string to_string() const { return _body; }
 
                 static Body from_string(const std::string& body_string);
             private:

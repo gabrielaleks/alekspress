@@ -5,7 +5,7 @@
 #include <vector>
 #include <unordered_set>
 
-namespace http {
+namespace internal {
     namespace request {
         class Headers {
             public:

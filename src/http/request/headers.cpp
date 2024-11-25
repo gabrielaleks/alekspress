@@ -2,7 +2,7 @@
 #include "utils/string_utils.h"
 #include <iostream>
 
-namespace http {
+namespace internal {
     namespace request {
         const std::unordered_set<std::string> Headers::headers_to_combine = {
             "accept",

@@ -1,6 +1,6 @@
 #include "body.hpp"
 
-namespace http {
+namespace internal {
     namespace request {
         Body::Body(std::string body): _body(std::move(body)) {
         }

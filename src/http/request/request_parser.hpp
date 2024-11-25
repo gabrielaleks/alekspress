@@ -2,7 +2,7 @@
 
 #include <string>
 
-namespace http {
+namespace internal {
     namespace request {
         class RequestParser {
             public:

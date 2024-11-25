@@ -1,16 +1,33 @@
-#include "http_request.hpp"
+#include "request.hpp"
 #include <vector>
+#include <iostream>
 
-namespace http {
+namespace internal {
     namespace request {
-        HttpRequest::HttpRequest(
+        Request::Request(
             RequestLine request_line,
             Headers headers,
             Body body
         ) : _request_line(std::move(request_line)), _headers(std::move(headers)), _body(std::move(body)) {
+            // validate()
+            // - if content-length > 0 && method shouldnt have body, alert
+            // - if content-length == 0 or header wasnt included but generally method includes it, alert
+            // - compare content-length with body length; should be the same
+
+            // Debugging
+            std::cout << "< HTTP Request Line" << std::endl;
+            std::cout << _request_line.method() << std::endl;
+            std::cout << _request_line.path() << std::endl;
+            std::cout << _request_line.http_version() << std::endl;
+            std::cout << "< HTTP Request Headers" << std::endl;
+            _headers.print_all();
+            std::cout << "< HTTP Request Body" << std::endl;
+            std::cout << _body.to_string() << std::endl;
+            std::cout << "\n-----\n" << std::endl;
+            // ---
         }
 
-        HttpRequest HttpRequest::from_string(const std::string http_request_string) {
+        Request Request::from_string(const std::string http_request_string) {
             std::vector<std::string> header_lines;
 
             // Extract body index and body content
@@ -31,7 +48,7 @@ namespace http {
 
             Body body = Body::from_string(body_string);
 
-            HttpRequest http_request = HttpRequest(
+            Request http_request = Request(
                 request_line,
                 headers,
                 body
@@ -40,8 +57,8 @@ namespace http {
             return http_request;
         }
 
-        std::string HttpRequest::to_string() const {
+        std::string Request::to_string() const {
             return _request_line.to_string();
         }
     };  // namespace request
-}  // namespace http
+}  // namespace internal

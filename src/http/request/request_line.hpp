@@ -5,7 +5,7 @@
 #include <unordered_set>
 #include <algorithm>
 
-namespace http {
+namespace internal {
     namespace request {
         class RequestLine {
         public:
@@ -30,12 +30,12 @@ namespace http {
             std::string _path;
             std::string _http_version;
 
-            static const std::unordered_set<std::string> validMethods;
-            static const std::unordered_set<std::string> validHttpVersions;
+            static const std::unordered_set<std::string> VALID_METHODS;
+            static const std::unordered_set<std::string> VALID_HTTP_VERSIONS;
 
             void validate() const;
             static bool is_valid_method(const std::string_view& method);
             static bool is_valid_http_version(const std::string_view& http_version);
         };
     }  // namespace request
-}  // namespace http
+}  // namespace internal

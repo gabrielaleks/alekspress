@@ -1,9 +1,9 @@
 #include "request_line.hpp"
 #include <iostream>
 
-namespace http {
+namespace internal {
     namespace request {
-        const std::unordered_set<std::string> RequestLine::validMethods = {
+        const std::unordered_set<std::string> RequestLine::VALID_METHODS = {
             "GET",
             "POST",
             "PUT",
@@ -13,7 +13,7 @@ namespace http {
             "HEAD"
         };
 
-        const std::unordered_set<std::string> RequestLine::validHttpVersions = {
+        const std::unordered_set<std::string> RequestLine::VALID_HTTP_VERSIONS = {
             "HTTP/1.1"
         };
 
@@ -74,11 +74,11 @@ namespace http {
         }
 
         bool RequestLine::is_valid_method(const std::string_view& method) {
-            return validMethods.find(std::string(method)) != validMethods.end();
+            return VALID_METHODS.find(std::string(method)) != VALID_METHODS.end();
         }
 
         bool RequestLine::is_valid_http_version(const std::string_view& http_version) {
-            return validHttpVersions.find(std::string(http_version)) != validHttpVersions.end();
+            return VALID_HTTP_VERSIONS.find(std::string(http_version)) != VALID_HTTP_VERSIONS.end();
         }
     } // namespace request
-}  // namespace http
+}  // namespace internal

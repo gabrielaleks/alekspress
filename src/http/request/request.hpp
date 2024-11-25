@@ -6,19 +6,19 @@
 #include "headers.hpp"
 #include "body.hpp"
 
-namespace http {
+namespace internal {
     namespace request {
-        class HttpRequest {
+        class Request {
         public:
-            HttpRequest() = default;
+            Request() = default;
 
-            HttpRequest(
+            Request(
                 RequestLine request_line,
                 Headers headers,
                 Body body
             );
 
-            static HttpRequest from_string(const std::string http_request_char_buffer);
+            static Request from_string(const std::string http_request_char_buffer);
 
             RequestLine request_line() const { return _request_line; }
             Headers headers() const { return _headers; }
@@ -32,4 +32,4 @@ namespace http {
             Body _body;
         };
     }  // namespace request
-}  // namespace http
+}  // namespace internal
