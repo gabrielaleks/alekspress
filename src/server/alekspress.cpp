@@ -1,47 +1,70 @@
 #include <http_server/alekspress.hpp>
+#include <http_server/request.hpp>
+
 #include <string>
 #include <iostream>
 #include <stdexcept>
 
-#include "http/request/http_request.hpp"
+#include "http/request/request.hpp"
+#include "http/response/response.hpp"
+#include "http/response/status_line.hpp"
+#include "http/response/headers.hpp"
+#include "http/response/body.hpp"
 #include "http/request/request_parser.hpp"
 
-namespace server {
+namespace alekspress {
     Alekspress::Alekspress(int port) : _port(std::move(port)), _socket(std::move(_port)) {
+    }
+
+    void Alekspress::get(const std::string& path, HandlerFunction handler) {
+        _handlers[path]["GET"] = handler;
+    }
+
+    void Alekspress::post(const std::string& path, HandlerFunction handler) {
+        _handlers[path]["POST"] = handler;
+    }
+
+    void Alekspress::put(const std::string& path, HandlerFunction handler) {
+        _handlers[path]["PUT"] = handler;
+    }
+
+    void Alekspress::patch(const std::string& path, HandlerFunction handler) {
+        _handlers[path]["PATCH"] = handler;
+    }
+
+    void Alekspress::del(const std::string& path, HandlerFunction handler) {
+        _handlers[path]["DELETE"] = handler;
     }
 
     void Alekspress::handle_connections() {
         auto connection = _socket.accept_connection();
         
-        http::request::RequestParser parser;
+        internal::request::RequestParser parser;
         while (true) {
             const int BUFFER_SIZE = 1024;
             char buffer[BUFFER_SIZE] = {0};
             ssize_t bytes_read = connection.read(buffer, sizeof(buffer));
-            // printf("Number of bytes read: %zd\n", bytes_read);
             parser.append_to_request(buffer, bytes_read);
             if (parser.is_request_complete()) {
                 break;
             }
         }
-        http::request::HttpRequest http_request = http::request::HttpRequest::from_string(parser.complete_request());
+        internal::request::Request internal_request = internal::request::Request::from_string(parser.complete_request());
 
-        std::cout << "--- HTTP Request Line ---" << std::endl;
-        std::cout << http_request.request_line().method() << std::endl;
-        std::cout << http_request.request_line().path() << std::endl;
-        std::cout << http_request.request_line().http_version() << std::endl;
-        std::cout << "--- HTTP Request Headers ---" << std::endl;
-        http_request.headers().print_all();
-        std::cout << "--- HTTP Request Body ---" << std::endl;
-        std::cout << http_request.body().content() << std::endl;
+        // FROM internal request TO public request
+        alekspress::Request public_request = alekspress::Request::from_internal_request(internal_request);
+
+        auto handler = _handlers[public_request.path()][public_request.method()];
+
+        // Execute handler with public request, generating public response
+        alekspress::Response public_response = handler(public_request);
         
-        const char* response = 
-            "HTTP/1.1 200 OK\r\n"
-            "Content-Type: text/plain\r\n"
-            "Content-Length: 13\r\n"
-            "\r\n"
-            "Hello, World!";
-        connection.write(response, sizeof(response));
+        // FROM public response TO internal response
+        auto internal_response = internal::response::Response::from_public_response(public_response);
+
+        // Serialize internal response and write it
+        std::string raw_response = internal_response.serialize();
+        connection.write(raw_response.c_str(), raw_response.length());
     }
 
     void Alekspress::run() {

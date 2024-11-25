@@ -1,14 +1,24 @@
 #pragma once
-#include "network/socket.hpp"
 
-namespace server {
+#include "network/socket.hpp"
+#include <http_server/request.hpp>
+#include <http_server/response.hpp>
+#include <functional>
+#include <unordered_map>
+
+namespace alekspress {
+    using HandlerFunction = std::function<Response(const Request&)>;
+
     class Alekspress {
         public:
             Alekspress(int port);
 
             // Public API for configuring routes
-            // void get(const std::string& path, HandlerFunction handler);
-            // void post(const std::string& path, HandlerFunction handler);
+            void get(const std::string& path, HandlerFunction handler);
+            void post(const std::string& path, HandlerFunction handler);
+            void put(const std::string& path, HandlerFunction handler);
+            void patch(const std::string& path, HandlerFunction handler);
+            void del(const std::string& path, HandlerFunction handler);
 
             // Server lifecycle
             void run(); // Blocking
@@ -18,8 +28,14 @@ namespace server {
         private:
             int _port;
             void handle_connections();
+            std::unordered_map<
+                std::string,            // path
+                std::unordered_map <
+                    std::string,        // method
+                    HandlerFunction
+                >
+            > _handlers;
 
-            // for now
             network::Socket _socket;
     };
 }
