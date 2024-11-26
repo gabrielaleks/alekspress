@@ -15,8 +15,8 @@ namespace internal {
 
             Body body(public_response._body);
 
-            // Validate existing headers, if body is defined should add content-length
             Headers headers;
+            headers.add_default_headers(public_response._body.length());
             for (auto const& [key, value] : public_response._headers) {
                 headers.add(key, value);
             }
