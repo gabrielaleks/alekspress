@@ -4,12 +4,12 @@
 
 namespace internal {
     namespace request {
-        const std::unordered_set<std::string> Headers::headers_to_combine = {
+        const std::unordered_set<std::string> Headers::HEADERS_TO_COMBINE = {
             "accept",
             "connection"
         };
 
-        const std::unordered_set<std::string> Headers::mandatory_headers {
+        const std::unordered_set<std::string> Headers::MANDATORY_HEADERS {
             "host"
         };
         
@@ -20,7 +20,7 @@ namespace internal {
         }
 
         void Headers::validate() const {
-            for (const auto& mandatory_header : mandatory_headers) {
+            for (const auto& mandatory_header : MANDATORY_HEADERS) {
                 if (_headers.find(mandatory_header) == _headers.end()) {
                     throw std::invalid_argument("Missing mandatory header: " + mandatory_header);
                 }
@@ -48,7 +48,7 @@ namespace internal {
                 // Check for key's existence in map
                 if (headers_map.find(key) != headers_map.end()) {
                     // Case 1: comma-separated headers
-                    if (Headers::headers_to_combine.find(key) != Headers::headers_to_combine.end()) {
+                    if (Headers::HEADERS_TO_COMBINE.find(key) != Headers::HEADERS_TO_COMBINE.end()) {
                         value = headers_map[key] + ", " + value;
                     }
                 }

@@ -29,8 +29,8 @@ namespace internal {
             private:
                 std::unordered_map<std::string, std::string> _headers;
 
-                static const std::unordered_set<std::string> headers_to_combine;
-                static const std::unordered_set<std::string> mandatory_headers;
+                static const std::unordered_set<std::string> HEADERS_TO_COMBINE;
+                static const std::unordered_set<std::string> MANDATORY_HEADERS;
 
                 void validate() const;
         };
