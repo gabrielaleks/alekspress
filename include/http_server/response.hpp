@@ -3,6 +3,7 @@
 
 #include <string>
 #include <unordered_map>
+#include <http_server/status_code.hpp>
 
 namespace internal {
     namespace response {
@@ -25,7 +26,7 @@ namespace alekspress {
             static Response ok(std::string body);
         private:
             std::string _http_version = "HTTP/1.1";
-            int _status_code = 200;
+            int _status_code = StatusCode::OK;
             std::unordered_map<std::string, std::string> _headers;
             std::string _body;
 

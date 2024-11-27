@@ -17,6 +17,8 @@ namespace internal {
                 void set_http_version(std::string http_version);
                 void set_status_code(int status_code);
 
+                static const std::string& get_status_text_from_status_code(int code);
+
                 std::string serialize();
             private:
                 std::string _http_version;
