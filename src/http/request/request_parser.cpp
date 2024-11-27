@@ -1,6 +1,6 @@
 #include "request_parser.hpp"
 #include <iostream>
-#include "utils/string_utils.h"
+#include "utils/string_utils.hpp"
 
 namespace internal {
     namespace request {
