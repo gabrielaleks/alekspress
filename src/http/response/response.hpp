@@ -17,7 +17,7 @@ namespace internal {
                     Body body
                 );
 
-                static Response from_public_response(const alekspress::Response& public_response);
+                static Response from_user_response(const alekspress::Response& public_response);
                 
                 std::string serialize();
             private:

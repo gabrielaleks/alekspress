@@ -8,6 +8,10 @@
 
 namespace alekspress {
     using HandlerFunction = std::function<Response(const Request&)>;
+    using RawRequest = internal::request::Request;
+    using RawResponse = internal::response::Response;
+    using UserRequest = alekspress::Request;
+    using UserResponse = alekspress::Response;
 
     class Alekspress {
         public:

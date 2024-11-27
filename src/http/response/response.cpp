@@ -10,14 +10,14 @@ namespace internal {
         ) : _status_line(std::move(status_line)), _headers(std::move(headers)), _body(std::move(body))  {
         }
 
-        Response Response::from_public_response(const alekspress::Response& public_response) {
-            StatusLine status_line(public_response._http_version, public_response._status_code);
+        Response Response::from_user_response(const alekspress::Response& user_response) {
+            StatusLine status_line(user_response._http_version, user_response._status_code);
 
-            Body body(public_response._body);
+            Body body(user_response._body);
 
             Headers headers;
-            headers.add_default_headers(public_response._body.length());
-            for (auto const& [key, value] : public_response._headers) {
+            headers.add_default_headers(user_response._body.length());
+            for (auto const& [key, value] : user_response._headers) {
                 headers.add(key, value);
             }
 

@@ -49,22 +49,22 @@ namespace alekspress {
                 break;
             }
         }
-        internal::request::Request internal_request = internal::request::Request::from_string(parser.complete_request());
+        auto raw_request = RawRequest::from_string(parser.complete_request());
 
-        // FROM internal request TO public request
-        alekspress::Request public_request = alekspress::Request::from_internal_request(internal_request);
+        // FROM raw request TO user request
+        UserRequest user_request = UserRequest::from_raw_request(raw_request);
 
-        auto handler = _handlers[public_request.path()][public_request.method()];
+        HandlerFunction handler = _handlers[user_request.path()][user_request.method()];
 
-        // Execute handler with public request, generating public response
-        alekspress::Response public_response = handler(public_request);
+        // Execute handler with user request, generating user response
+        UserResponse user_response = handler(user_request);
         
-        // FROM public response TO internal response
-        auto internal_response = internal::response::Response::from_public_response(public_response);
+        // FROM user response TO raw response
+        RawResponse raw_response = RawResponse::from_user_response(user_response);
 
-        // Serialize internal response and write it
-        std::string raw_response = internal_response.serialize();
-        connection.write(raw_response.c_str(), raw_response.length());
+        // Serialize raw response and write it
+        std::string raw_response_serialized = raw_response.serialize();
+        connection.write(raw_response_serialized.c_str(), raw_response_serialized.length());
     }
 
     void Alekspress::run() {

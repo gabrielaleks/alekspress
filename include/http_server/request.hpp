@@ -10,7 +10,7 @@ namespace alekspress {
         public:
             Request() = default;
 
-            static Request from_internal_request(internal::request::Request internal_request);
+            static Request from_raw_request(internal::request::Request internal_request);
 
             std::string method() const { return _method; }
             std::string path() const { return _path; }
