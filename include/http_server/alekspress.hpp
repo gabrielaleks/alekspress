@@ -23,6 +23,8 @@ namespace alekspress {
             void put(const std::string& path, HandlerFunction handler);
             void patch(const std::string& path, HandlerFunction handler);
             void del(const std::string& path, HandlerFunction handler);
+            void options(const std::string& path, HandlerFunction handler);
+            void head(const std::string& path, HandlerFunction handler);
 
             // Server lifecycle
             void run(); // Blocking

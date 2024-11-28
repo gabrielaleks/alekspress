@@ -36,6 +36,14 @@ namespace alekspress {
         _handlers[path]["DELETE"] = handler;
     }
 
+    void Alekspress::options(const std::string& path, HandlerFunction handler) {
+        _handlers[path]["OPTIONS"] = handler;
+    }
+
+    void Alekspress::head(const std::string& path, HandlerFunction handler) {
+        _handlers[path]["HEAD"] = handler;
+    }
+
     void Alekspress::handle_connections() {
         auto connection = _socket.accept_connection();
         
