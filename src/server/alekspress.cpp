@@ -47,11 +47,25 @@ namespace alekspress {
     void Alekspress::handle_connections() {
         auto connection = _socket.accept_connection();
         
-        internal::request::RequestParser parser;
+        Parser parser;
         while (true) {
-            const int BUFFER_SIZE = 1024;
-            char buffer[BUFFER_SIZE] = {0};
+            char buffer[Parser::READ_BUFFER_SIZE] = {0};
             ssize_t bytes_read = connection.read(buffer, sizeof(buffer));
+
+            // Check for error on read()
+            if (bytes_read < 0) {
+                // Check for timeout
+                if (errno == EAGAIN || errno == EWOULDBLOCK) {
+                    throw std::runtime_error("[408] Socket read timeout occurred");
+                    // Could also include Connection: close header
+                } else {
+                    throw std::runtime_error("[500] Socket read failed: " + std::string(strerror(errno)));
+                }
+            } else if (bytes_read == 0) {
+                // Connection closed by the client
+                throw std::runtime_error("[400] Client closed the connection prematurely");
+            }
+
             parser.append_to_request(buffer, bytes_read);
             if (parser.is_request_complete()) {
                 break;
