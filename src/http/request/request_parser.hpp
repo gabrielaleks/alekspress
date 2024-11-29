@@ -13,6 +13,8 @@ namespace internal {
                 bool is_request_complete();
                 
                 const std::string complete_request() { return _complete_request; }
+
+                const static size_t READ_BUFFER_SIZE = 1024;
             private:
                 const size_t MAX_REQUEST_SIZE = 1 * 1024 * 1024;
             
@@ -23,10 +25,7 @@ namespace internal {
                 ssize_t _body_bytes_received = 0;
                 ssize_t _expected_content_length = -1;
 
-                bool is_method_without_body(const std::string& method);
-
                 int parse_content_length(const std::string& headers_lowercased);
-                std::string parse_method(const std::string& headers_lowercased);
         };
     }
 }

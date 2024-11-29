@@ -6,10 +6,8 @@ namespace internal {
     namespace request {
         void RequestParser::append_to_request(const char* buffer, ssize_t bytes_read) {
             _complete_request.append(buffer, bytes_read);
-
             if (_complete_request.length() > MAX_REQUEST_SIZE) {
-                throw std::length_error("Request exceeded maximum size: " + std::to_string(MAX_REQUEST_SIZE) + " bytes");
-                // Could throw specialized exception that returns a 413 content too large
+                throw std::length_error("[413] Request exceeded maximum size: " + std::to_string(MAX_REQUEST_SIZE) + " bytes");
             }
 
             if (!_is_headers_complete) {
@@ -21,16 +19,6 @@ namespace internal {
                     std::string headers_lowercased = utils::StringUtils::to_lowercase(_complete_request);
 
                     _expected_content_length = parse_content_length(headers_lowercased);
-
-                    if (_expected_content_length > 0) {
-                        _method = parse_method(headers_lowercased);
-                        if (is_method_without_body(_method)) {
-                            throw std::invalid_argument(
-                                "Body not allowed in " + utils::StringUtils::to_uppercase(_method) + " request"
-                            );
-                            // Could throw specialized exception that returns a 400 bad request
-                        }
-                    }
 
                     _body_bytes_received = _complete_request.length() - (headers_end + 4);
                 }
@@ -51,14 +39,11 @@ namespace internal {
             return _is_request_complete;
         }
 
-        bool RequestParser::is_method_without_body(const std::string& method) {
-            if (method == "get" || method == "head" || method == "delete") {
-                return true;
-            }
-            return false;
-        }
-
         int RequestParser::parse_content_length(const std::string& headers_lowercased) {
+            if (_expected_content_length != -1) {
+                return _expected_content_length;
+            }
+            
             std::string headers = headers_lowercased.substr(0, headers_lowercased.find("\r\n\r\n"));
             
             std::string to_find = "content-length:";
@@ -78,22 +63,11 @@ namespace internal {
                     int content_length = std::stoi(content_length_str);
                     return content_length;
                 } catch(const std::exception& e) {
-                    return -1;
+                    throw std::length_error("[400] Could not parse Content-Length: " + content_length_str);
                 }
             }
 
             return -1;
-        }
-
-        std::string RequestParser::parse_method(const std::string& headers_lowercased) {
-            size_t method_end = headers_lowercased.find(" ");
-
-            if (method_end == std::string::npos) {
-                throw std::invalid_argument("Invalid request: " + headers_lowercased);
-            }
-            
-            std::string method = headers_lowercased.substr(0, method_end);
-            return method;
         }
     }
 }

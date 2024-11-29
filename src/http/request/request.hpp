@@ -30,6 +30,10 @@ namespace internal {
             RequestLine _request_line;
             Headers _headers;
             Body _body;
+
+            static const std::unordered_set<std::string> METHODS_WITHOUT_BODY;
+
+            void validate() const;
         };
     }  // namespace request
 }  // namespace internal
