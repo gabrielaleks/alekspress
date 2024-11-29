@@ -10,7 +10,6 @@
 #include "http/response/status_line.hpp"
 #include "http/response/headers.hpp"
 #include "http/response/body.hpp"
-#include "http/request/request_parser.hpp"
 
 namespace alekspress {
     Alekspress::Alekspress(int port) : _port(std::move(port)), _socket(std::move(_port)) {
@@ -77,6 +76,11 @@ namespace alekspress {
         UserRequest user_request = UserRequest::from_raw_request(raw_request);
 
         HandlerFunction handler = _handlers[user_request.path()][user_request.method()];
+
+        if (!handler) {
+            throw std::runtime_error("[404] Requested resource not found: " + user_request.path());
+            return;
+        }
 
         // Execute handler with user request, generating user response
         UserResponse user_response = handler(user_request);
