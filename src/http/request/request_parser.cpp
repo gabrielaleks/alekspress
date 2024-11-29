@@ -1,5 +1,6 @@
 #include "request_parser.hpp"
 #include <iostream>
+#include <exceptions/http_exceptions.hpp>
 #include "utils/string_utils.hpp"
 
 namespace internal {
@@ -7,7 +8,7 @@ namespace internal {
         void RequestParser::append_to_request(const char* buffer, ssize_t bytes_read) {
             _complete_request.append(buffer, bytes_read);
             if (_complete_request.length() > MAX_REQUEST_SIZE) {
-                throw std::length_error("[413] Request exceeded maximum size: " + std::to_string(MAX_REQUEST_SIZE) + " bytes");
+                throw exceptions::ContentTooLargeException("Request exceeded maximum size: " + std::to_string(MAX_REQUEST_SIZE) + " bytes");
             }
 
             if (!_is_headers_complete) {
@@ -63,7 +64,7 @@ namespace internal {
                     int content_length = std::stoi(content_length_str);
                     return content_length;
                 } catch(const std::exception& e) {
-                    throw std::length_error("[400] Could not parse Content-Length: " + content_length_str);
+                    throw exceptions::BadRequestException("Could not parse Content-Length: " + content_length_str);
                 }
             }
 

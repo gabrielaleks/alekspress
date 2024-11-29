@@ -20,6 +20,8 @@ namespace internal {
                 static const std::string& get_status_text_from_status_code(int code);
 
                 std::string serialize();
+
+                static constexpr std::string DEFAULT_HTTP_VERSION = "HTTP/1.1";
             private:
                 std::string _http_version;
                 int _status_code;

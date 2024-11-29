@@ -1,5 +1,6 @@
 #include <http_server/alekspress.hpp>
 #include <http_server/request.hpp>
+#include <exceptions/http_exceptions.hpp>
 
 #include <string>
 #include <iostream>
@@ -45,52 +46,60 @@ namespace alekspress {
 
     void Alekspress::handle_connections() {
         auto connection = _socket.accept_connection();
-        
-        Parser parser;
-        while (true) {
-            char buffer[Parser::READ_BUFFER_SIZE] = {0};
-            ssize_t bytes_read = connection.read(buffer, sizeof(buffer));
 
-            // Check for error on read()
-            if (bytes_read < 0) {
-                // Check for timeout
-                if (errno == EAGAIN || errno == EWOULDBLOCK) {
-                    throw std::runtime_error("[408] Socket read timeout occurred");
-                    // Could also include Connection: close header
-                } else {
-                    throw std::runtime_error("[500] Socket read failed: " + std::string(strerror(errno)));
+        try {
+            Parser parser;
+            while (true) {
+                char buffer[Parser::READ_BUFFER_SIZE] = {0};
+                ssize_t bytes_read = connection.read(buffer, sizeof(buffer));
+
+                // Check for error on read()
+                if (bytes_read < 0) {
+                    // Check for timeout
+                    if (errno == EAGAIN || errno == EWOULDBLOCK) {
+                        throw exceptions::RequestTimeoutException("Socket read timeout");
+                        // Could also include Connection: close header
+                    } else {
+                        throw exceptions::InternalServerErrorException("Socket read failed");
+                    }
+                } else if (bytes_read == 0) {
+                    throw exceptions::BadRequestException("Client closed the connection prematurely");
                 }
-            } else if (bytes_read == 0) {
-                // Connection closed by the client
-                throw std::runtime_error("[400] Client closed the connection prematurely");
+
+                parser.append_to_request(buffer, bytes_read);
+                if (parser.is_request_complete()) {
+                    break;
+                }
+            }
+            auto raw_request = RawRequest::from_string(parser.complete_request());
+
+            // FROM raw request TO user request
+            UserRequest user_request = UserRequest::from_raw_request(raw_request);
+
+            HandlerFunction handler = _handlers[user_request.path()][user_request.method()];
+
+            if (!handler) {
+                throw exceptions::NotFoundException("Requested resource not found: " + user_request.path());
             }
 
-            parser.append_to_request(buffer, bytes_read);
-            if (parser.is_request_complete()) {
-                break;
-            }
+            // Execute handler with user request, generating user response
+            UserResponse user_response = handler(user_request);
+            
+            // FROM user response TO raw response
+            RawResponse raw_response = RawResponse::from_user_response(user_response);
+
+            // Serialize raw response and write it
+            std::string raw_response_serialized = raw_response.serialize();
+            connection.write(raw_response_serialized.c_str(), raw_response_serialized.length());
+        } catch (exceptions::HttpException& e) {
+            // Add logging feature
+            // Maybe add config allowing user to choose path to which save the logs?
+            // std::cout << "[" << e.status_code() << "]" << ": " << e.message() << std::endl;
+
+            RawResponse raw_response = RawResponse::from_exception(e);
+            std::string raw_response_serialized = raw_response.serialize();
+            connection.write(raw_response_serialized.c_str(), raw_response_serialized.length());
         }
-        auto raw_request = RawRequest::from_string(parser.complete_request());
-
-        // FROM raw request TO user request
-        UserRequest user_request = UserRequest::from_raw_request(raw_request);
-
-        HandlerFunction handler = _handlers[user_request.path()][user_request.method()];
-
-        if (!handler) {
-            throw std::runtime_error("[404] Requested resource not found: " + user_request.path());
-            return;
-        }
-
-        // Execute handler with user request, generating user response
-        UserResponse user_response = handler(user_request);
-        
-        // FROM user response TO raw response
-        RawResponse raw_response = RawResponse::from_user_response(user_response);
-
-        // Serialize raw response and write it
-        std::string raw_response_serialized = raw_response.serialize();
-        connection.write(raw_response_serialized.c_str(), raw_response_serialized.length());
     }
 
     void Alekspress::run() {

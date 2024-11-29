@@ -1,9 +1,10 @@
 #include "request_line.hpp"
 #include <iostream>
+#include <exceptions/http_exceptions.hpp>
 
 namespace internal {
     namespace request {
-        const std::unordered_set<std::string> RequestLine::VALID_METHODS = {
+        const std::unordered_set<std::string> RequestLine::SUPPORTED_METHODS = {
             "GET",
             "POST",
             "PUT",
@@ -13,7 +14,7 @@ namespace internal {
             "HEAD"
         };
 
-        const std::unordered_set<std::string> RequestLine::VALID_HTTP_VERSIONS = {
+        const std::unordered_set<std::string> RequestLine::SUPPORTED_HTTP_VERSIONS = {
             "HTTP/1.1"
         };
 
@@ -26,22 +27,22 @@ namespace internal {
         }
 
         void RequestLine::validate() const {
-            if (!is_valid_method(_method)) {
-                throw std::invalid_argument("Invalid HTTP method: " + std::string(_method));
+            if (!is_supported_method(_method)) {
+                throw exceptions::BadRequestException("Invalid HTTP method: " + std::string(_method));
             }
-            if (!is_valid_http_version(_http_version)) {
-                throw std::invalid_argument("Invalid HTTP version: " + std::string(_http_version));
+            if (!is_supported_http_version(_http_version)) {
+                throw exceptions::HttpVersionNotSupportedException("HTTP version not supported: " + std::string(_http_version));
             }
         }
 
         RequestLine RequestLine::from_string(const std::string& request_line_string) {
             if (request_line_string.empty()) {
-                throw std::invalid_argument("Request line cannot be empty");
+                throw exceptions::BadRequestException("Request line cannot be empty");
             }
 
             size_t space_count = std::count(request_line_string.begin(), request_line_string.end(), ' ');
             if (space_count != 2) {
-                throw std::invalid_argument("Request line must contain exactly three parts separated by spaces");
+                throw exceptions::BadRequestException("Request line must contain exactly three parts separated by spaces.\nReceived: " + request_line_string);
             }
             
             size_t start = 0, end = 0;
@@ -58,7 +59,7 @@ namespace internal {
 
             // Extract HTTP version
             if (start >= request_line_string.size()) {
-                throw std::invalid_argument("Invalid HTTP request line: missing elements");
+                throw exceptions::BadRequestException("Invalid HTTP request line due to missing elements.\nReceived: " + request_line_string);
             }
             std::string http_version = request_line_string.substr(start);
 
@@ -73,12 +74,12 @@ namespace internal {
             return std::string(_method) + " " + std::string(_path) + " " + std::string(_http_version);
         }
 
-        bool RequestLine::is_valid_method(const std::string_view& method) {
-            return VALID_METHODS.find(std::string(method)) != VALID_METHODS.end();
+        bool RequestLine::is_supported_method(const std::string_view& method) {
+            return SUPPORTED_METHODS.find(std::string(method)) != SUPPORTED_METHODS.end();
         }
 
-        bool RequestLine::is_valid_http_version(const std::string_view& http_version) {
-            return VALID_HTTP_VERSIONS.find(std::string(http_version)) != VALID_HTTP_VERSIONS.end();
+        bool RequestLine::is_supported_http_version(const std::string_view& http_version) {
+            return SUPPORTED_HTTP_VERSIONS.find(std::string(http_version)) != SUPPORTED_HTTP_VERSIONS.end();
         }
     } // namespace request
 }  // namespace internal

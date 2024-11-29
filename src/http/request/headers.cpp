@@ -1,6 +1,7 @@
 #include "headers.hpp"
 #include "utils/string_utils.hpp"
 #include <iostream>
+#include <exceptions/http_exceptions.hpp>
 
 namespace internal {
     namespace request {
@@ -22,14 +23,14 @@ namespace internal {
         void Headers::validate() const {
             for (const auto& mandatory_header : MANDATORY_HEADERS) {
                 if (_headers.find(mandatory_header) == _headers.end()) {
-                    throw std::invalid_argument("Missing mandatory header: " + mandatory_header);
+                    throw exceptions::BadRequestException("Request is missing mandatory header: " + mandatory_header);
                 }
             }
         }
 
         Headers Headers::from_vector(const std::vector<std::string>& headers_vector) {
             if (headers_vector.empty()) {
-                throw std::invalid_argument("Headers vector cannot be empty");
+                throw exceptions::BadRequestException("Request doesn't contain any header");
             }
             
             Headers headers;
@@ -38,7 +39,7 @@ namespace internal {
                 size_t keyEnd = line.find(": ");
 
                 if (keyEnd == std::string::npos) {
-                    throw std::invalid_argument("Invalid HTTP header: " + line);
+                    throw exceptions::BadRequestException("Invalid HTTP header: " + line);
                 }
 
                 std::string key = utils::StringUtils::to_lowercase(line.substr(0, keyEnd));

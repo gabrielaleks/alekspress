@@ -25,7 +25,6 @@ namespace alekspress {
             // Standard responses
             static Response ok(std::string body);
         private:
-            std::string _http_version = "HTTP/1.1";
             int _status_code = StatusCode::OK;
             std::unordered_map<std::string, std::string> _headers;
             std::string _body;

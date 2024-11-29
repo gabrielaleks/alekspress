@@ -1,6 +1,7 @@
 #include "request.hpp"
 #include <vector>
 #include <iostream>
+#include <exceptions/http_exceptions.hpp>
 
 namespace internal {
     namespace request {
@@ -26,35 +27,40 @@ namespace internal {
 
         void Request::validate() const {
             bool is_content_length_zeroed_or_undefined = _headers.content_length() == "0" || _headers.content_length() == "";
+            size_t body_length = _body.to_string().length();
+            size_t content_length = (size_t)stoi(_headers.content_length());
 
             if (
                 is_content_length_zeroed_or_undefined &&
-                _body.to_string().length() != 0
+                body_length != 0
             ) {
-                throw std::invalid_argument("[411] Missing Content-Length");
+                throw exceptions::LengthRequiredException();
             }
             
             if (
                 !is_content_length_zeroed_or_undefined &&
-                _body.to_string().length() == 0
+                body_length == 0
             ) {
-                throw std::invalid_argument("[400] Content-Length is not zero but body is empty");
+                throw exceptions::BadRequestException("Content-Length is not zero but body is empty");
             }
 
             if (
                 !is_content_length_zeroed_or_undefined &&
-                (size_t)stoi(_headers.content_length()) != _body.to_string().length()
+                content_length != body_length
             ) {
-                throw std::invalid_argument("[400] Content-Length does not match body");
+                throw exceptions::BadRequestException(
+                    "Content-Length does not match body\nContent-Length: " +
+                    std::to_string(content_length) +
+                    "\nBody length: " +
+                    std::to_string(body_length)
+                );
             }
 
             // Ensure methods without body do not contain a body
             bool is_method_without_body = METHODS_WITHOUT_BODY.find(_request_line.method()) != METHODS_WITHOUT_BODY.end();
             if (is_method_without_body && !is_content_length_zeroed_or_undefined) {
-                throw std::invalid_argument("[400] Request method does not support a body");
+                throw exceptions::BadRequestException("Request method does not support a body");
             }
-
-            // Ensure the body mathces the format specified by the Content-Type (JSON, XML etc)
         }
 
         const std::unordered_set<std::string> Request::METHODS_WITHOUT_BODY {

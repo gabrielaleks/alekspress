@@ -4,6 +4,7 @@
 #include "headers.hpp"
 #include "body.hpp"
 #include <http_server/response.hpp>
+#include <exceptions/http_exceptions.hpp>
 
 namespace internal {
     namespace response {
@@ -18,6 +19,7 @@ namespace internal {
                 );
 
                 static Response from_user_response(const alekspress::Response& public_response);
+                static Response from_exception(const exceptions::HttpException& exception);
                 
                 std::string serialize();
             private:

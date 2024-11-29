@@ -11,7 +11,7 @@ namespace internal {
         }
 
         Response Response::from_user_response(const alekspress::Response& user_response) {
-            StatusLine status_line(user_response._http_version, user_response._status_code);
+            StatusLine status_line(StatusLine::DEFAULT_HTTP_VERSION, user_response._status_code);
 
             Body body(user_response._body);
 
@@ -20,6 +20,17 @@ namespace internal {
             for (auto const& [key, value] : user_response._headers) {
                 headers.add(key, value);
             }
+
+            return Response(status_line, headers, body);
+        }
+
+        Response Response::from_exception(const exceptions::HttpException& exception) {
+            StatusLine status_line(StatusLine::DEFAULT_HTTP_VERSION, exception.status_code());
+
+            Body body(exception.message());
+
+            Headers headers;
+            headers.add_default_headers(exception.message().length());
 
             return Response(status_line, headers, body);
         }

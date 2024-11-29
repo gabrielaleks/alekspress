@@ -16,9 +16,10 @@ add_executable(${PROJECT_NAME} ${PROJECT_SOURCES})
 # Include directories (this will recursively add all subdirectories under src)
 target_include_directories(${PROJECT_NAME}
     PUBLIC
-        ${CMAKE_SOURCE_DIR}/include  # Public headers
+        ${CMAKE_SOURCE_DIR}/include 
+        ${CMAKE_SOURCE_DIR}/exceptions
     PRIVATE
-        ${CMAKE_SOURCE_DIR}/src      # Private headers
+        ${CMAKE_SOURCE_DIR}/src
 )
 
 # Optional: Add compiler warnings

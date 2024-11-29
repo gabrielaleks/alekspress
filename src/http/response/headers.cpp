@@ -13,7 +13,7 @@ namespace internal {
             add("Server", SERVER_NAME_AND_VERSION);
             add("Date", get_http_date());
             add("Content-Length", std::to_string(body_length));
-            add("Content-Type", "Content-Type: application/json; charset=utf-8");
+            add("Content-Type", "Content-Type: text/plain; charset=utf-8");
             add("Connection", "keep-alive");
         }
 
