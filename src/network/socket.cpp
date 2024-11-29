@@ -22,7 +22,7 @@ namespace network {
             throw std::runtime_error("Could not create socket");
         }
 
-        // Setting options
+        // Setting SO_REUSEADDR to reuse a local address in case it's in a TIME_WAIT state
         int opt = 1;
         if (setsockopt(_sockfd, SOL_SOCKET, SO_REUSEADDR, &opt, sizeof(opt)) < 0) {
             throw std::runtime_error("Could not add SO_REUSEADDR option");
@@ -60,6 +60,15 @@ namespace network {
         if (client_socket < 0) {
             throw std::runtime_error("Error accepting connection");
         }
+
+        // Setting timeout for client socket
+        struct timeval timeout;
+        timeout.tv_sec = CLIENT_TIMEOUT_SECONDS;
+        timeout.tv_usec = 0;
+
+        if (setsockopt(client_socket, SOL_SOCKET, SO_RCVTIMEO, &timeout, sizeof(timeout)) < 0) {
+            throw std::runtime_error("Failed to set socket timeout");
+        }        
 
         return Connection(
             client_socket,

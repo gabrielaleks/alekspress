@@ -26,5 +26,6 @@ namespace network {
         private:
             int _sockfd;
             int _port;
+            static constexpr int CLIENT_TIMEOUT_SECONDS = 5;
     };
 }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "network/socket.hpp"
+#include "http/request/request_parser.hpp"
 #include <http_server/request.hpp>
 #include <http_server/response.hpp>
 #include <functional>
@@ -8,6 +9,7 @@
 
 namespace alekspress {
     using HandlerFunction = std::function<Response(const Request&)>;
+    using Parser = internal::request::RequestParser;
     using RawRequest = internal::request::Request;
     using RawResponse = internal::response::Response;
     using UserRequest = alekspress::Request;
