@@ -2,6 +2,7 @@
 
 #include "network/socket.hpp"
 #include "http/request/request_parser.hpp"
+#include "http/route/route.hpp"
 #include <http_server/request.hpp>
 #include <http_server/response.hpp>
 #include <functional>
@@ -36,13 +37,21 @@ namespace alekspress {
         private:
             int _port;
             void handle_connections();
+
+            struct RouteHandler {
+                internal::Route route;
+                HandlerFunction handler;
+            };
+            
             std::unordered_map<
-                std::string,            // path
-                std::unordered_map <
-                    std::string,        // method
-                    HandlerFunction
-                >
+                std::string,               // method
+                std::vector<RouteHandler>  // list of routes and handlers
             > _handlers;
+
+            std::pair<HandlerFunction, std::unordered_map<std::string, std::string>> find_handler(
+                const std::string& method,
+                const std::string& path
+            );
 
             network::Socket _socket;
     };

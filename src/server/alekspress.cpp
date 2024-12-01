@@ -17,31 +17,44 @@ namespace alekspress {
     }
 
     void Alekspress::get(const std::string& path, HandlerFunction handler) {
-        _handlers[path]["GET"] = handler;
+        _handlers["GET"].push_back({internal::Route(path), handler});
     }
 
     void Alekspress::post(const std::string& path, HandlerFunction handler) {
-        _handlers[path]["POST"] = handler;
+        _handlers["POST"].push_back({internal::Route(path), handler});
     }
 
     void Alekspress::put(const std::string& path, HandlerFunction handler) {
-        _handlers[path]["PUT"] = handler;
+        _handlers["PUT"].push_back({internal::Route(path), handler});
     }
 
     void Alekspress::patch(const std::string& path, HandlerFunction handler) {
-        _handlers[path]["PATCH"] = handler;
+        _handlers["PATCH"].push_back({internal::Route(path), handler});
     }
 
     void Alekspress::del(const std::string& path, HandlerFunction handler) {
-        _handlers[path]["DELETE"] = handler;
+        _handlers["DELETE"].push_back({internal::Route(path), handler});
     }
 
     void Alekspress::options(const std::string& path, HandlerFunction handler) {
-        _handlers[path]["OPTIONS"] = handler;
+        _handlers["OPTIONS"].push_back({internal::Route(path), handler});
     }
 
     void Alekspress::head(const std::string& path, HandlerFunction handler) {
-        _handlers[path]["HEAD"] = handler;
+        _handlers["HEAD"].push_back({internal::Route(path), handler});
+    }
+
+    std::pair<HandlerFunction, std::unordered_map<std::string, std::string>> Alekspress::find_handler(
+        const std::string& method,
+        const std::string& path
+    ) {
+        for (const auto& route_handler : _handlers[method]) {
+            if (route_handler.route.matches(path)) {
+                auto params = route_handler.route.extract_params(path);
+                return {route_handler.handler, params};
+            }
+        }
+        return {};
     }
 
     void Alekspress::handle_connections() {
@@ -73,14 +86,17 @@ namespace alekspress {
             }
             auto raw_request = RawRequest::from_string(parser.complete_request());
 
-            // FROM raw request TO user request
-            UserRequest user_request = UserRequest::from_raw_request(raw_request);
-
-            HandlerFunction handler = _handlers[user_request.path()][user_request.method()];
+            auto [handler, params] = find_handler(
+                raw_request.request_line().method(),
+                raw_request.request_line().path()
+            );
 
             if (!handler) {
-                throw exceptions::NotFoundException("Requested resource not found: " + user_request.path());
+                throw exceptions::NotFoundException("Requested resource not found: " + raw_request.request_line().path());
             }
+
+            // FROM raw request TO user request
+            UserRequest user_request = UserRequest::from_raw_request(raw_request, params);
 
             // Execute handler with user request, generating user response
             UserResponse user_response = handler(user_request);
