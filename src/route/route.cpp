@@ -11,17 +11,21 @@ namespace internal {
         std::string regex_pattern = _pattern;
         std::regex param_regex(":[a-zA-Z]+");
         
-        // Convert "/users/:id" to "^/users/([^/]+)$" and store parameter names
-        std::string::const_iterator search_start(regex_pattern.cbegin());
+        // Find all parameters
+        auto pattern_copy = regex_pattern;
         std::smatch match;
-        while (std::regex_search(search_start, regex_pattern.cend(), match, param_regex)) {
+        while (std::regex_search(pattern_copy, match, param_regex)) {
             std::string param_name = match.str().substr(1); // Remove ':'
             _param_names.push_back(param_name);
-            
-            // Replace :param with regex capture group
-            regex_pattern.replace(match.position(), match.length(), "([^/]+)");
-            search_start = regex_pattern.cbegin() + match.position() + 7;
+            pattern_copy = match.suffix();
         }
+
+        // Replace all occurrences
+        regex_pattern = std::regex_replace(
+            regex_pattern,
+            param_regex,
+            "([^/]+)"
+        );
         
         _regex = std::regex("^" + regex_pattern + "$");
     }
