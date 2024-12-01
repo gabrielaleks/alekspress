@@ -17,7 +17,6 @@ add_executable(${PROJECT_NAME} ${PROJECT_SOURCES})
 target_include_directories(${PROJECT_NAME}
     PUBLIC
         ${CMAKE_SOURCE_DIR}/include 
-        ${CMAKE_SOURCE_DIR}/exceptions
     PRIVATE
         ${CMAKE_SOURCE_DIR}/src
 )
