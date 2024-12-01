@@ -2,7 +2,7 @@
 
 #include <stdexcept>
 #include <string>
-#include <http_server/status_code.hpp>
+#include <alekspress/status_code.hpp>
 
 namespace exceptions {
     class HttpException : public std::runtime_error {

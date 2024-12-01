@@ -3,7 +3,7 @@
 #include "status_line.hpp"
 #include "headers.hpp"
 #include "body.hpp"
-#include <http_server/response.hpp>
+#include <alekspress/response.hpp>
 #include <exceptions/http_exceptions.hpp>
 
 namespace internal {
